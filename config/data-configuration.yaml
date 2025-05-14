@@ -1,4 +1,7 @@
 ---
+persistence_api:
+    type: sql
+    db_connection: "mysql://taxii:taxii123@mysql-db/taxiipersist"
 services:
     - id: inbox
       type: inbox
