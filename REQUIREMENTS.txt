@@ -3,5 +3,6 @@ pyaml
 cabby
 mysqlclient
 opentaxii
+gunicorn
 -e git+https://github.com/MISP/PyMISP#egg=pymisp
 -e git+https://github.com/MISP/MISP-STIX-Converter.git#egg=misp-stix-converter

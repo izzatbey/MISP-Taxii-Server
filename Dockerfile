@@ -23,6 +23,8 @@ WORKDIR /app
 
 RUN git clone --recursive --depth 1 https://github.com/izzatbey/MISP-Taxii-Server .
 
+RUN git pull
+
 RUN pip install --no-cache-dir --upgrade pip
 
 RUN pip install --no-cache-dir -r REQUIREMENTS.txt
