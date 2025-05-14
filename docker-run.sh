@@ -1,6 +1,6 @@
-export OPENTAXII_CONFIG=/MISP-Taxii-Server/config.yaml && export PYTHONPATH=.
+export OPENTAXII_CONFIG=/MISP-Taxii-Server/config/config.yaml && export PYTHONPATH=.
 
-cat > /MISP-Taxii-Server/config.yaml <<EOF
+cat > /MISP-Taxii-Server/config/config.yaml <<EOF
 domain: "localhost:9000"
 support_basic_auth: yes
 
