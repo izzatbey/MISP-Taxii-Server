@@ -34,7 +34,8 @@ COPY ./config/config.yaml /app/config/config.yaml
 ENV OPENTAXII_CONFIG=/app/config/config.yaml
 ENV PYTHONPATH=.
 
-RUN opentaxii-sync-data config/data-configuration.yaml
+RUN which opentaxii-create-services || echo "opentaxii-create-services not found"
+#RUN opentaxii-sync-data config/data-configuration.yaml
 
 RUN python3 setup.py install
 
@@ -43,5 +44,5 @@ COPY ./docker-run.sh ./run.sh
 RUN chmod +x ./docker-run.sh
 
 # Default command
-CMD ["/bin/sh", "/docker-run.sh"]
-# CMD ["opentaxii-run-dev"]
+#CMD ["/bin/sh", "./docker-run.sh"]
+CMD ["opentaxii-run-dev"]

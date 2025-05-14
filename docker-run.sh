@@ -1,45 +1,35 @@
-export OPENTAXII_CONFIG=/app/config/config.yaml && export PYTHONPATH=.
+#!/bin/sh
+set -e
 
-cat > /app/config/config.yaml <<EOF
-domain: "localhost:9000"
-support_basic_auth: yes
+echo "Docker-run.sh: Starting up..."
 
-persistence_api:
-  class: opentaxii.persistence.sqldb.SQLDatabaseAPI
-  parameters:
-    db_connection: $PERSIST_CONNECTION_STRING
-    create_tables: yes
+# Check for required commands
+if ! command -v opentaxii-create-services &> /dev/null; then
+    echo "opentaxii-create-services not found!"
+    exit 1
+fi
 
-auth_api:
-  class: opentaxii.auth.sqldb.SQLDatabaseAPI
-  parameters:
-    db_connection: $AUTH_CONNECTION_STRING
-    create_tables: yes
-    secret: ILoveTheSecretStringIsIsGreatButNeedsToBeChangedFrienderino
+# Wait for the database to be available...
+DB_HOST="mysql-db"
+DB_PORT="3306"
+# Wait for the database connection...
+echo "Waiting for database ($DB_HOST:$DB_PORT) to be ready..."
+attempts=0
+while ! nc -z $DB_HOST $DB_PORT; do
+    attempts=$((attempts + 1))
+    if [ $attempts -gt 24 ]; then
+        echo "Error: Database ($DB_HOST:$DB_PORT) did not become available after 2 minutes."
+        exit 1
+    fi
+    echo "Database not ready yet (attempt $attempts)... sleeping for 5 seconds."
+    sleep 5
+done
+echo "Database is ready!"
 
-logging:
-  opentaxii: info
-  root: info
+# Create services and accounts
+echo "Creating services and accounts..."
+opentaxii-create-services /app/config/data-configuration.yaml 
+opentaxii-create-accounts /app/config/data-configuration.yaml
 
-hooks: misp_taxii_hooks.hooks
-# Sample configuration for misp_taxii_server
-
-zmq:
-    host: "$ZMQ_HOST"
-    port: "$ZMQ_PORT"
-
-misp:
-    url: "$MISP_URL"
-    api: "$MISP_KEY"
-
-taxii:
-    auth:
-        username: "$TAXII_USER"
-        password: "$TAXII_PASS"
-    collections:
-        - collection
-EOF
-opentaxii-create-services -c config/services.yaml && opentaxii-create-collections -c config/collections.yaml
-
-opentaxii-create-account -u $TAXII_USER -p $TAXII_PASS
-gunicorn opentaxii.http:app --bind 0.0.0.0:9000
+echo "Starting OpenTAXII server (development mode)..."
+exec opentaxii-run-dev # Change this line if you want to run it differently
