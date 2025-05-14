@@ -1,0 +1,43 @@
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: misp_taxii_db
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 4dm1n@c42023
+      MYSQL_DATABASE: taxiiauth
+      MYSQL_USER: taxii
+      MYSQL_PASSWORD: taxii123
+    volumes:
+      - mysql_taxii_data:/var/lib/mysql
+    networks:
+      - taxii_network
+
+  taxii-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: misp_taxii_server
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+    depends_on:
+      - mysql-db
+    environment:
+      OPENTAXII_CONFIG: /app/config/config.yaml
+      PYTHONPATH: .
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+    networks:
+      - taxii_network
+
+networks:
+  taxii_network:
+    driver: bridge
+
+volumes:
+  mysql_taxii_data:
+    driver: local
